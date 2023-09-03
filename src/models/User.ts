@@ -6,7 +6,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    name:{
+    fullname: {
+        type: String,
+        required: true
+    },
+    email: {
         type: String,
         required: true
     },
@@ -14,12 +18,19 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    roles: {
-        type: [String],
-        default: ["Employee"],
-    },
     photo: {
         type: Object
+    },
+    about: {
+        type: String
+    },
+    country: {
+        type: String,
+        required: true,
+    },
+    role: {
+        type: String,
+        default: "User",
     },
     active: {
         type: Boolean,

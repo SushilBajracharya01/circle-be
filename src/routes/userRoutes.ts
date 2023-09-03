@@ -4,12 +4,12 @@ import { getAllUsers, createNewUser, updateUser } from '../controllers/userContr
 
 const userRouter = Router();
 
+userRouter.route('/').post(createNewUser);
+
 userRouter.use(verifyJWT);
 
 userRouter.route('/')
     .get(getAllUsers)
-    .post(createNewUser)
     .patch(updateUser);
-
 
 export default userRouter;

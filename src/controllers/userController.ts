@@ -11,6 +11,7 @@ export const getAllUsers = expressAsyncHandler(async (req: Request, res: Respons
     const users = await User.find().select('-password').lean();
     if (!users?.length) {
         res.status(400).json({ message: 'No users found' });
+        return null;
     }
 
     res.json(users);
@@ -21,28 +22,30 @@ export const getAllUsers = expressAsyncHandler(async (req: Request, res: Respons
 // @route POST /users
 // @access Private
 export const createNewUser = expressAsyncHandler(async (req: Request, res: Response) => {
-    const { username, name, password, roles, photo } = req.body;
+    const { username, fullname, email, password, role, country, photo } = req.body;
 
     // Confirm data
-    if (!username || !password || !name) {
+    if (!username || !email || !password || !fullname || !country) {
         res.status(400).json({ message: 'All Fields are required' });
+        return;
     }
 
     // Check for duplicate
-    const duplicate = await User.findOne({ username }).collation({ locale: 'en', strength: 2 }).lean().exec();
+    const duplicate = await User.findOne({ email }).collation({ locale: 'en', strength: 2 }).lean().exec();
 
     if (duplicate) {
-        res.status(409).json({ message: 'Duplicate username' });
+        res.status(409).json({ message: 'Duplicate Email' });
+        return;
     }
 
     // Hash password
     const hashedPwd = await bcrypt.hash(password, 10);
 
-    const userObject = (!Array.isArray(roles) || !roles.length) ? {
-        username, 'password': hashedPwd, name, photo
+    const userObject = !role ? {
+        username, email, 'password': hashedPwd, fullname, country, photo
     } :
         {
-            username, 'password': hashedPwd, roles, name, photo
+            username, email, 'password': hashedPwd, role, fullname, country, photo
         };
 
     // Create and Store new user
@@ -50,9 +53,11 @@ export const createNewUser = expressAsyncHandler(async (req: Request, res: Respo
 
     if (user) {
         res.status(201).json({ message: `New user ${username} created` });
+        return;
     }
     else {
         res.status(400).json({ message: 'Invalid user data received' });
+        return;
     }
 });
 
@@ -60,30 +65,35 @@ export const createNewUser = expressAsyncHandler(async (req: Request, res: Respo
 // @route PATCH /users
 // @access Private
 export const updateUser = expressAsyncHandler(async (req: Request, res: Response) => {
-    const { id, username, name, photo, roles, active, password } = req.body;
+    const { id, username, email, fullname, country, photo, role, active, password } = req.body;
 
     // Confirm data
-    if (!id || !username || !Array.isArray(roles) || !roles.length || typeof active !== "boolean" || !name) {
+    if (!id || !username || !role || typeof active !== "boolean" || !fullname) {
         res.status(400).json({ message: "All fields are required" })
+        return;
     }
 
     const user = await User.findById(id).exec();
 
     if (!user) {
         res.status(400).json({ message: 'User not found' });
+        return;
     }
 
     // check for duplicate
-    const duplicate = await User.findOne({ username }).collation({ locale: 'en', strength: 2 }).lean().exec();
+    const duplicate = await User.findOne({ email }).collation({ locale: 'en', strength: 2 }).lean().exec();
 
     if (duplicate && duplicate?._id.toString() !== id) {
         res.status(409).json({ message: 'Duplicate username' });
+        return;
     }
 
     user.username = username;
-    user.roles = roles;
+    user.role = role;
+    user.email = email;
+    user.country = country;
     user.active = active;
-    user.name = name;
+    user.fullname = fullname;
     user.photo = photo;
 
     if (password) {
@@ -93,4 +103,5 @@ export const updateUser = expressAsyncHandler(async (req: Request, res: Response
     const updatedUser = await user.save();
 
     res.json({ message: `${updatedUser.username} Updated` })
+    return;
 });
