@@ -25,3 +25,17 @@
 20230903	23:23:17	f06b617c-3a74-4157-8b36-837350e91123	GET	/auth/refresh	undefined
 20230903	23:32:08	a062fd65-0892-489c-a152-0dbd7498e1c6	GET	/auth/refresh	undefined
 20230903	23:34:27	5f825a19-d7d1-4f71-a437-bcbc0eda445e	POST	/auth/logout	undefined
+20230904	09:43:10	fa1fcc88-9aa3-42f3-8118-bf5e87006c0c	POST	/auth	http://localhost:5173
+20230904	09:44:42	34bf00bb-aac1-4854-bd2b-25f440e1fb1b	POST	/auth	http://localhost:5173
+20230904	09:46:41	4080a3b5-312f-44ac-95b3-1ccf878e9e4f	POST	/users	http://localhost:5173
+20230904	09:50:01	8ccdc7cc-bb8e-458a-a803-466dc8f10449	POST	/users	http://localhost:5173
+20230904	09:50:50	1ac5ce8b-bb98-4e83-99d8-d830a2b86863	POST	/users	http://localhost:5173
+20230904	09:50:55	e4e6b9a0-e135-44a4-90ae-a38f12f78b14	POST	/users	http://localhost:5173
+20230904	09:52:28	7a431ccd-729d-485f-afac-243ccc1c3595	POST	/users	http://localhost:5173
+20230904	09:55:25	5ea10f26-87cd-4b44-b4ab-287a0e7cc408	POST	/users	http://localhost:5173
+20230904	09:59:10	59a97de6-2cea-42c7-9d29-53118c818dbb	POST	/users	http://localhost:5173
+20230904	12:05:53	b1ad3eb9-81e6-4441-b4d4-f933165ad8b9	POST	/users	http://localhost:5173
+20230904	12:07:10	8c6158bf-4339-40a3-a992-efa212fc9095	POST	/users	http://localhost:5173
+20230904	12:07:47	01dd3f32-5b45-4f79-9dda-792866f51bb6	POST	/users	http://localhost:5173
+20230904	12:10:20	9fe5dc9b-66a9-4f71-9357-c7655c0d8b0b	POST	/users	http://localhost:5173
+20230904	12:18:18	026e1856-ee6c-4dd0-9f8a-f50798ef01c0	POST	/users	http://localhost:5173
