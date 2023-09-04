@@ -5,3 +5,5 @@
 20230903	21:37:00	5efdfde3-0d8a-4ba4-9819-156ef445da9f	Error: Cannot set headers after they are sent to the client	POST	/users	undefined
 20230903	21:37:20	2898d8a6-ae43-4ac4-bc11-3d295194ce80	Error: Cannot set headers after they are sent to the client	POST	/users	undefined
 20230904	09:43:10	a64c16da-1a3e-42bc-87bf-b00aed87f7dc	Error: Not allowed by CORS	POST	/auth	http://localhost:5173
+20230905	00:08:38	11f6128b-71b4-4d98-8339-62071bcf608d	SyntaxError: Unexpected token } in JSON at position 66	POST	/auth/	undefined
+20230905	00:43:12	b89b6ee0-2dc1-4826-9d73-ffb850a47719	MongooseError: Model.findByIdAndDelete() no longer accepts a callback	DELETE	/circle/64f61c07ef6a0da1258ba644	undefined

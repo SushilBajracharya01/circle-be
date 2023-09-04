@@ -22,6 +22,7 @@ import fileDirName from './utilities/file-dir-name.js'
 import { router } from "./routes/root.js";
 import authRouter from "./routes/authRoutes.js";
 import userRouter from "./routes/userRoutes.js";
+import circleRouter from "./routes/circleRoutes.js";
 
 const { __dirname } = fileDirName(import.meta);
 
@@ -47,6 +48,7 @@ app.use('/', router);
 
 app.use('/auth', authRouter);
 app.use('/users', userRouter);
+app.use('/circle', circleRouter);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 app.all('*', (req: any, res: any) => {
