@@ -3,6 +3,8 @@ import expressAsyncHandler from "express-async-handler";
 import { Request, Response } from 'express';
 
 import User from "../models/User.js";
+import cloudinary from '../utilities/cloudinary.js';
+import { dataUri } from '../middleware/multer.js';
 
 // @desc Get all users
 // @route GET /users
@@ -22,7 +24,7 @@ export const getAllUsers = expressAsyncHandler(async (req: Request, res: Respons
 // @route POST /users
 // @access Private
 export const createNewUser = expressAsyncHandler(async (req: Request, res: Response) => {
-    const { username, fullname, email, password, role, country, photo } = req.body;
+    const { username, fullname, email, password, role, country } = req.body;
 
     // Confirm data
     if (!username || !email || !password || !fullname || !country) {
@@ -40,12 +42,26 @@ export const createNewUser = expressAsyncHandler(async (req: Request, res: Respo
 
     // Hash password
     const hashedPwd = await bcrypt.hash(password, 10);
-
+    let profilePicObject = null;
+    let profilePic = null;
+    if (req.files && req.files[0]) {
+        let tempPic = req.files[0];
+        if (!tempPic) return;
+        profilePic = dataUri(tempPic);
+    }
+    if (profilePic) {
+        const uploadRes = await cloudinary.uploader.upload(profilePic, {
+            upload_preset: 'user-profile-pic'
+        });
+        if (uploadRes) {
+            profilePicObject = uploadRes;
+        }
+    }
     const userObject = !role ? {
-        username, email, 'password': hashedPwd, fullname, country, photo
+        username, email, 'password': hashedPwd, fullname, country, photo: profilePicObject
     } :
         {
-            username, email, 'password': hashedPwd, role, fullname, country, photo
+            username, email, 'password': hashedPwd, role, fullname, country, photo: profilePicObject
         };
 
     // Create and Store new user
