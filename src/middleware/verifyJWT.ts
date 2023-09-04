@@ -2,8 +2,9 @@ import jwt from 'jsonwebtoken';
 import { NextFunction, Request, Response } from 'express';
 
 export interface IVefifyJWTRequest extends Request {
-    username: string;
-    roles: string[];
+    _id: string;
+    email: string;
+    role: string;
 }
 
 /**
@@ -31,10 +32,11 @@ const verifyJWT = (req: IVefifyJWTRequest, res: Response, next: NextFunction) =>
     const token = authHeader.split(' ')[1];
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err: any, decoded: { UserInfo: { username: string, roles: string[] } }) => {
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err: any, decoded: { UserInfo: { _id: string, email: string, role: string } }) => {
         if (err) return res.status(403).json({ message: 'Forbidden' });
-        req.username = decoded.UserInfo.username;
-        req.roles = decoded.UserInfo.roles;
+        req._id = decoded.UserInfo._id;
+        req.email = decoded.UserInfo.email;
+        req.role = decoded.UserInfo.role;
 
         next();
     });
