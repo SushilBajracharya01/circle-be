@@ -13,7 +13,7 @@ interface IRequestModified extends Request {
 // @access Private
 export const getCirclesByUserId = expressAsyncHandler(async (req: IRequestModified, res: Response) => {
     const userId = req._id;
-    const circles = await Circle.find({ creator: userId }).lean();
+    const circles = await Circle.find({ createdBy: userId }).lean();
     if (!circles?.length) {
         res.status(400).json({ message: 'No Circles found' });
         return null;
@@ -35,7 +35,7 @@ export const createNewCircle = expressAsyncHandler(async (req: IRequestModified,
         res.status(400).json({ message: 'Name Fields are required' });
         return;
     }
-    const circleObject = { name, description, moto, creator: userId, members: [userId] };
+    const circleObject = { name, description, moto, createdBy: userId, members: [userId] };
 
     // Create and Store new circle
     const circle = await Circle.create(circleObject);
@@ -71,7 +71,7 @@ export const updateCircle = expressAsyncHandler(async (req: IRequestModified, re
         return;
     }
 
-    if (`${circle.creator}` !== userId) {
+    if (`${circle.createdBy}` !== userId) {
         res.status(401).json({ message: 'You do not have the permission to update this Circle.' });
         return;
     }
@@ -107,7 +107,7 @@ export const deleteCircle = expressAsyncHandler(async (req: IRequestModified, re
             return;
         }
 
-        if (`${circle.creator}` !== userId) {
+        if (`${circle.createdBy}` !== userId) {
             res.status(401).json({ message: 'You do not have the permission to delete this Circle.' });
             return;
         }

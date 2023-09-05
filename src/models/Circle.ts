@@ -18,7 +18,7 @@ const circleSchema = new mongoose.Schema({
         }],
         required: true
     },
-    creator: {
+    createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     }
