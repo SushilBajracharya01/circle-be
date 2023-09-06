@@ -6,8 +6,6 @@ import expressAsyncHandler from "express-async-handler";
 //
 import User from "../models/User.js";
 
-
-
 // @desc POST
 // @route POST /auth
 // @access Public

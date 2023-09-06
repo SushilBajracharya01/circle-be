@@ -1,19 +1,16 @@
 import expressAsyncHandler from "express-async-handler";
 import { Request, Response } from 'express';
 import Circle from '../models/Circle.js';
+import { IRequestModified } from "../types.js";
 
-
-interface IRequestModified extends Request {
-    email: string;
-    role: string;
-    _id: string;
-}
 // @desc Get all circle by userId
 // @route GET /circle
 // @access Private
 export const getCirclesByUserId = expressAsyncHandler(async (req: IRequestModified, res: Response) => {
+    const { circleId } = req.params;
     const userId = req._id;
-    const circles = await Circle.find({ createdBy: userId }).lean();
+    
+    const circles = await Circle.find({ circleId: circleId }).lean();
     if (!circles?.length) {
         res.status(400).json({ message: 'No Circles found' });
         return null;
