@@ -28,6 +28,11 @@ export const createNewPost = expressAsyncHandler(async (req: IRequestModified, r
 
     const { content, circleId } = req.body;
 
+    if(!circleId) {
+        res.status(400).json({ message: 'CircleId are required' });
+        return;
+    }
+
     // Confirm data
     if (!content) {
         res.status(400).json({ message: 'Content Fields are required' });
