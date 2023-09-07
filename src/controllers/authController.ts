@@ -94,7 +94,7 @@ export const refresh = expressAsyncHandler(async (req: Request, res: Response) =
         res.json({ accessToken });
     }
     catch (error) {
-        res.status(403).json({ message: "Forbidden" });
+        res.status(401).json({ message: "Token expired" });
         return null;
     }
 });
