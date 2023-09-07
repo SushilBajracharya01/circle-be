@@ -10,7 +10,7 @@ export const getPostsByCircleId = expressAsyncHandler(async (req: IRequestModifi
     const userId = req._id;
     const { circleId } = req.params;
 
-    const posts = await Post.find({ circleId }).lean();
+    const posts = await Post.find({ circleId }).populate('createdBy', { username: 1, fullname: 1, photo: 1 });
     if (!posts?.length) {
         res.status(400).json({ message: 'No Circles found' });
         return null;
@@ -28,7 +28,7 @@ export const createNewPost = expressAsyncHandler(async (req: IRequestModified, r
 
     const { content, circleId } = req.body;
 
-    if(!circleId) {
+    if (!circleId) {
         res.status(400).json({ message: 'CircleId are required' });
         return;
     }

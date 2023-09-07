@@ -7,10 +7,9 @@ import { IRequestModified } from "../types.js";
 // @route GET /circle
 // @access Private
 export const getCirclesByUserId = expressAsyncHandler(async (req: IRequestModified, res: Response) => {
-    const { circleId } = req.params;
     const userId = req._id;
     
-    const circles = await Circle.find({ circleId: circleId }).lean();
+    const circles = await Circle.find({ createdBy: userId }).lean();
     if (!circles?.length) {
         res.status(400).json({ message: 'No Circles found' });
         return null;
@@ -64,7 +63,7 @@ export const updateCircle = expressAsyncHandler(async (req: IRequestModified, re
     const circle = await Circle.findById(id).exec();
 
     if (!circle) {
-        res.status(400).json({ message: 'Circle not found' });
+        res.status(404).json({ message: 'Circle not found' });
         return;
     }
 
