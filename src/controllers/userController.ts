@@ -5,6 +5,21 @@ import { Request, Response } from 'express';
 import User from "../models/User.js";
 import cloudinary from '../utilities/cloudinary.js';
 import { dataUri } from '../middleware/multer.js';
+import { IRequestModified } from '../types.js';
+
+// @desc Get me
+// @route GET /me
+// @access Private
+export const getMe = expressAsyncHandler(async (req: IRequestModified, res: Response) => {
+    const userId = req._id;
+    const user = await User.findById(userId).select(['-password', '-__v']).lean();
+    if (!user) {
+        res.status(400).json({ message: 'No user found' });
+        return null;
+    }
+
+    res.json(user);
+});
 
 // @desc Get all users
 // @route GET /users
@@ -92,7 +107,7 @@ export const updateUser = expressAsyncHandler(async (req: Request, res: Response
     const user = await User.findById(id).exec();
 
     if (!user) {
-        res.status(400).json({ message: 'User not found' });
+        res.status(404).json({ message: 'User not found' });
         return;
     }
 
