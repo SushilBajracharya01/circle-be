@@ -9,6 +9,9 @@ postRouter.use(verifyJWT);
 postRouter.route('/')
     .post(createNewPost);
 
+postRouter.route('/:circleId')
+    .get(getPostsByCircleId);
+
 postRouter.route('/:postId')
     .patch(updatePost)
     .delete(deletePost);

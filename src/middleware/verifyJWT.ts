@@ -33,7 +33,7 @@ const verifyJWT = (req: IVefifyJWTRequest, res: Response, next: NextFunction) =>
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err: any, decoded: { UserInfo: { _id: string, email: string, role: string } }) => {
-        if (err) return res.status(403).json({ message: 'Forbidden' });
+        if (err) return res.status(401).json({ message: 'Token expired' });
         req._id = decoded.UserInfo._id;
         req.email = decoded.UserInfo.email;
         req.role = decoded.UserInfo.role;
