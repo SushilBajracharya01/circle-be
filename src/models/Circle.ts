@@ -5,7 +5,7 @@ const circleSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    descriptions: {
+    description: {
         type: String,
     },
     moto: {
@@ -21,7 +21,10 @@ const circleSchema = new mongoose.Schema({
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
-    }
+    },
+    photo: {
+        type: Object
+    },
 }, {
     timestamps: true
 })

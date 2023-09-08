@@ -2,20 +2,29 @@ import expressAsyncHandler from "express-async-handler";
 import { Request, Response } from 'express';
 import Circle from '../models/Circle.js';
 import { IRequestModified } from "../types.js";
+import { dataUri } from "../middleware/multer.js";
+import cloudinary from "../utilities/cloudinary.js";
 
 // @desc Get all circle by userId
 // @route GET /circle
 // @access Private
 export const getCirclesByUserId = expressAsyncHandler(async (req: IRequestModified, res: Response) => {
     const userId = req._id;
-    
-    const circles = await Circle.find({ createdBy: userId }).lean();
+
+    const circles = await Circle.find({ createdBy: userId }).select('-updatedAt -__v');
     if (!circles?.length) {
-        res.status(400).json({ message: 'No Circles found' });
+        res.status(400).json({
+            results: [],
+            message: 'No Circles found'
+        });
         return null;
     }
 
-    res.json(circles);
+    res.json({
+        status: 200,
+        message: 'User circles',
+        results: circles
+    });
 });
 
 
@@ -25,13 +34,30 @@ export const getCirclesByUserId = expressAsyncHandler(async (req: IRequestModifi
 export const createNewCircle = expressAsyncHandler(async (req: IRequestModified, res: Response) => {
     const userId = req._id;
     const { name, description, moto } = req.body;
-
+    console.log(name, 'name')
     // Confirm data
     if (!name) {
         res.status(400).json({ message: 'Name Fields are required' });
         return;
     }
-    const circleObject = { name, description, moto, createdBy: userId, members: [userId] };
+    let circlePhotoObject = null;
+    let circleImagePic = null;
+    if (req.files && req.files[0]) {
+        let tempPic = req.files[0];
+        if (!tempPic) return;
+        circleImagePic = dataUri(tempPic);
+    }
+    if (circleImagePic) {
+        const uploadRes = await cloudinary.uploader.upload(circleImagePic, {
+            upload_preset: 'circle-pic'
+        });
+        if (uploadRes) {
+            circlePhotoObject = uploadRes;
+        }
+    }
+    const circleObject = {
+        name, description, moto, createdBy: userId, members: [userId], photo: circlePhotoObject
+    };
 
     // Create and Store new circle
     const circle = await Circle.create(circleObject);
@@ -52,7 +78,7 @@ export const createNewCircle = expressAsyncHandler(async (req: IRequestModified,
 export const updateCircle = expressAsyncHandler(async (req: IRequestModified, res: Response) => {
     const { id } = req.params;
     const userId = req._id;
-    const { name, descriptions, moto } = req.body;
+    const { name, description, moto } = req.body;
 
     // Confirm data
     if (!name) {
@@ -73,7 +99,7 @@ export const updateCircle = expressAsyncHandler(async (req: IRequestModified, re
     }
 
     circle.name = name;
-    circle.descriptions = descriptions;
+    circle.description = description;
     circle.moto = moto;
 
     const updatedCircle = await circle.save();
