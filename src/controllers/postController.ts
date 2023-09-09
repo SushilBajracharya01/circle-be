@@ -2,6 +2,8 @@ import expressAsyncHandler from "express-async-handler";
 import { Response } from 'express';
 import { IRequestModified } from "../types.js";
 import Post from "../models/Post.js";
+import { dataUri } from "../middleware/multer.js";
+import cloudinary from "../utilities/cloudinary.js";
 
 // @desc Get all post by userId
 // @route GET /post
@@ -10,15 +12,37 @@ export const getPostsByCircleId = expressAsyncHandler(async (req: IRequestModifi
     const userId = req._id;
     const { circleId } = req.params;
 
-    const posts = await Post.find({ circleId }).populate('createdBy', { username: 1, fullname: 1, photo: 1 });
+    const posts = await Post.find({ circleId }).populate('createdBy', { username: 1, fullname: 1, photo: 1 }).select('-__v');
     if (!posts?.length) {
         res.status(400).json({ message: 'No Circles found' });
         return null;
     }
 
-    res.json(posts);
+    res.json({
+        message: 'Posts in the circle',
+        status: 200,
+        results: posts
+    });
 });
 
+// @desc Get post by postId
+// @route GET /get
+// @access Private
+export const getPostsById = expressAsyncHandler(async (req: IRequestModified, res: Response) => {
+    const { postId } = req.params;
+
+    const post = await Post.find({ _id: postId }).populate('createdBy', { username: 1, fullname: 1, photo: 1 }).select('-__v');
+    if (!post) {
+        res.status(400).json({ message: 'No post found' });
+        return null;
+    }
+
+    res.json({
+        message: "Post by Id",
+        result: post,
+        status: 200
+    });
+});
 
 // @desc Create new post
 // @route POST /post
@@ -39,7 +63,27 @@ export const createNewPost = expressAsyncHandler(async (req: IRequestModified, r
         return;
     }
 
-    const postObject = { circleId: circleId, content, createdBy: userId };
+    let photoPhotos = [];
+    const FILES: any = req.files;
+    if (FILES) {
+        const resp = await Promise.all(
+            FILES.map(async (file) => {
+                if (!file) return;
+                let data_uri = dataUri(file);
+
+                if (data_uri) {
+                    const uploadRes = await cloudinary.uploader.upload(data_uri, {
+                        upload_preset: 'post-pic'
+                    });
+                    return uploadRes;
+                }
+                return null;
+            })
+        );
+        photoPhotos = resp;
+    }
+
+    const postObject = { circleId: circleId, content, createdBy: userId, photos: photoPhotos };
 
     // Create and Store new post
     const post = await Post.create(postObject);
