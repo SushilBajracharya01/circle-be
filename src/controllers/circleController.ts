@@ -28,6 +28,35 @@ export const getCirclesByUserId = expressAsyncHandler(async (req: IRequestModifi
 });
 
 
+export const getCircleById = expressAsyncHandler(async (req: IRequestModified, res: Response) => {
+    const userId = req._id;
+    const id = req.params;
+
+    const circle = await Circle.findOne(id).select('-updatedAt -__v');
+    if (!circle) {
+        res.status(400).json({
+            result: null,
+            message: 'No Circle found'
+        });
+        return null;
+    }
+
+    if (!circle.members.map(member => member.toString()).includes(userId)) {
+        res.status(403).json({
+            result: null,
+            message: "You are not Authorized to view this circle."
+        })
+        return;
+    }
+
+    res.json({
+        status: 200,
+        message: 'Circle',
+        result: circle
+    });
+});
+
+
 // @desc Create new circle
 // @route POST /circle
 // @access Private

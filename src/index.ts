@@ -49,8 +49,8 @@ app.use('/', router);
 
 app.use('/auth', authRouter);
 app.use('/users', userRouter);
-app.use('/circle', circleRouter);
-app.use('/post', postRouter);
+app.use('/circles', circleRouter);
+app.use('/posts', postRouter);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 app.all('*', (req: any, res: any) => {
