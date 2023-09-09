@@ -14,7 +14,7 @@ export const getPostsByCircleId = expressAsyncHandler(async (req: IRequestModifi
 
     const posts = await Post.find({ circleId }).populate('createdBy', { username: 1, fullname: 1, photo: 1 }).select('-__v').sort({
         _id: -1
-    });
+    }).limit(10);
     if (!posts?.length) {
         res.status(400).json({ message: 'No Circles found' });
         return null;
