@@ -30,9 +30,10 @@ export const getCirclesByUserId = expressAsyncHandler(async (req: IRequestModifi
 
 export const getCircleById = expressAsyncHandler(async (req: IRequestModified, res: Response) => {
     const userId = req._id;
-    const id = req.params;
+    const { id } = req.params;
 
-    const circle = await Circle.findOne(id).select('-updatedAt -__v');
+    const circle = await Circle.findOne({ _id: id }).select('-updatedAt -__v');
+    
     if (!circle) {
         res.status(400).json({
             result: null,
