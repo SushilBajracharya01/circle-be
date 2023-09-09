@@ -59,8 +59,7 @@ export const login = expressAsyncHandler(async (req: Request, res: Response) => 
 // @route GET /auth/refresh
 // @access Public
 export const refresh = expressAsyncHandler(async (req: Request, res: Response) => {
-    const refreshToken = req.header('authorization');
-
+    const refreshToken = req.header('Authorization');
     if (!refreshToken) {
         res.status(401).json({ message: "Unauthorized" })
         return null;
@@ -68,14 +67,14 @@ export const refresh = expressAsyncHandler(async (req: Request, res: Response) =
 
     try {
         let decoded = jwt.verify(
-            refreshToken,
+            refreshToken.split(' ')[1],
             process.env.REFRESH_TOKEN_SECRET,
         );
 
         const foundUser = await User.findOne({ email: decoded.email }).exec();
 
         if (!foundUser) {
-            res.status(401).json({ message: "Unauthorized" });
+            res.status(404).json({ message: "Unauthorized" });
             return null;
         }
 
