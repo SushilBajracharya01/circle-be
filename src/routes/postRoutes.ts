@@ -17,7 +17,7 @@ postRouter.route('/post/:postId')
     .get(getPostsById);
 
 postRouter.route('/:postId')
-    .patch(updatePost)
+    .patch(multerUploads, updatePost)
     .delete(deletePost);
 
 

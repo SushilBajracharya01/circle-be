@@ -107,7 +107,6 @@ export const updatePost = expressAsyncHandler(async (req: IRequestModified, res:
     const { postId } = req.params;
     const userId = req._id;
     const { content } = req.body;
-
     // Confirm data
     if (!content) {
         res.status(400).json({ message: "Content fields are required" })
@@ -126,9 +125,9 @@ export const updatePost = expressAsyncHandler(async (req: IRequestModified, res:
         return;
     }
 
-    await post.updateOne({ _id: postId }, {
-        "$set": {
-            content: content
+    const respo = await Post.updateOne({ _id: postId }, {
+        $set: {
+            "content": content
         }
     });
 
