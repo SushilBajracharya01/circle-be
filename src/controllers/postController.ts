@@ -161,7 +161,7 @@ export const deletePost = expressAsyncHandler(async (req: IRequestModified, res:
             return;
         }
 
-        await Post.deleteOne({ _id: userId });
+        await Post.deleteOne({ _id: postId });
 
         res.json({ message: `Deleted successfully` })
         return;
