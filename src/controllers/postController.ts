@@ -161,6 +161,12 @@ export const deletePost = expressAsyncHandler(async (req: IRequestModified, res:
             return;
         }
 
+        post.photos.forEach(async photo => {
+            await cloudinary.uploader.destroy(photo.public_id, function (error, result) {
+                console.log(result, error);
+            }).then(resp => console.log(resp)).catch(_err => console.log("Something went wrong, please try again later."));
+        })
+
         await Post.deleteOne({ _id: postId });
 
         res.json({ message: `Deleted successfully` })
