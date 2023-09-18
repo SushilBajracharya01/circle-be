@@ -8,3 +8,4 @@
 20230905	00:08:38	11f6128b-71b4-4d98-8339-62071bcf608d	SyntaxError: Unexpected token } in JSON at position 66	POST	/auth/	undefined
 20230905	00:43:12	b89b6ee0-2dc1-4826-9d73-ffb850a47719	MongooseError: Model.findByIdAndDelete() no longer accepts a callback	DELETE	/circle/64f61c07ef6a0da1258ba644	undefined
 20230908	23:41:43	a668c015-9b4b-4f40-8639-02cf8b21f046	Error: Upload preset not found	POST	/circle	http://localhost:5173
+20230918	20:10:32	cd93cb44-cfed-45f0-a444-935b7d978371	Error: Not allowed by CORS	OPTIONS	/auth	http://localhost:5174

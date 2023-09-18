@@ -1,2 +1,5 @@
 20230903	21:23:47	f969dc8c-1425-4051-aea6-4a67dd68fdb2	undefined: undefined	undefined	undefined
 20230903	21:30:41	332755bb-1b78-449d-b529-a3cd7d9c04c5	undefined: undefined	undefined	undefined
+20230916	08:26:24	8872ab0b-2170-4ea1-bd29-b91ba3f849ef	undefined: ESERVFAIL	querySrv	_mongodb._tcp.cluster0.kzg8ula.mongodb.net
+20230916	08:30:53	f59cb3ed-ff18-41ac-83e4-9c2eab31dfe3	undefined: ETIMEOUT	querySrv	_mongodb._tcp.cluster0.kzg8ula.mongodb.net
+20230916	08:32:29	ef913112-0e04-46d7-aa8e-371caaca60f6	undefined: ETIMEOUT	querySrv	_mongodb._tcp.cluster0.kzg8ula.mongodb.net
