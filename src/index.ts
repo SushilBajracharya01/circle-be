@@ -2,6 +2,7 @@ import { config } from "dotenv";
 //
 import cors from 'cors';
 import path from 'path';
+import { createServer } from 'http';
 import express from "express";
 import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
@@ -24,6 +25,9 @@ import authRouter from "./routes/authRoutes.js";
 import userRouter from "./routes/userRoutes.js";
 import circleRouter from "./routes/circleRoutes.js";
 import postRouter from "./routes/postRoutes.js";
+import { Server } from "socket.io";
+import { allowedOrigins } from "./configs/allowedOrigins.js";
+import { SOCKET_CONNECT, SOCKET_SEND_INVITE } from "./socketConstants.js";
 
 const { __dirname } = fileDirName(import.meta);
 
@@ -39,7 +43,8 @@ app.use(logger);
 app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json());
-app.use(express.urlencoded({extended: true})); 
+app.use(express.urlencoded({ extended: true }));
+
 
 
 // Routings
@@ -70,9 +75,25 @@ app.all('*', (req: any, res: any) => {
 
 app.use(errorHandler);
 
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+    cors: {
+        origin: allowedOrigins
+    },
+});
+
+io.on(SOCKET_CONNECT, (socket) => {
+    console.log("initial transport", socket.conn.transport.name);
+
+    socket.on(SOCKET_SEND_INVITE, (data) => {
+        console.log(data, 'type, data')
+    });
+});
+
+
 mongoose.connection.once('open', () => {
     console.log('Connected to MongoDB');
-    app.listen(PORT, () => console.log(`Server running on ${PORT}`))
+    httpServer.listen(PORT, () => console.log(`Server running on ${PORT}`))
 })
 
 mongoose.connection.on('error', err => {
