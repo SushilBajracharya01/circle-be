@@ -5,3 +5,9 @@ export interface IRequestModified extends Request {
     role: string;
     _id: string;
 }
+
+export interface IInviteInCircleProps {
+    circleId: string;
+    invitedBy: string;
+    invitee: string;
+}
