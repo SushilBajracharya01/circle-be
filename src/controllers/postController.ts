@@ -106,7 +106,8 @@ export const createNewPost = expressAsyncHandler(async (req: IRequestModified, r
 export const updatePost = expressAsyncHandler(async (req: IRequestModified, res: Response) => {
     const { postId } = req.params;
     const userId = req._id;
-    const { content } = req.body;
+    const { content, deletedImages } = req.body;
+
     // Confirm data
     if (!content) {
         res.status(400).json({ message: "Content fields are required" })
@@ -125,9 +126,48 @@ export const updatePost = expressAsyncHandler(async (req: IRequestModified, res:
         return;
     }
 
+    let tempPhotos = [...post.photos];
+    if (deletedImages) {
+        if (typeof deletedImages === 'string') {
+            await cloudinary.uploader.destroy(deletedImages, function (error, result) {
+                tempPhotos = tempPhotos.filter(photo => photo.public_id !== deletedImages);
+            }).then(resp => console.log(resp)).catch(_err => console.log("Something went wrong, please try again later."));
+        }
+        else {
+            deletedImages.forEach(async (publicId: string) => {
+                await cloudinary.uploader.destroy(publicId, function (error, result) {
+                    tempPhotos = tempPhotos.filter(photo => photo.public_id !== publicId);
+                    console.log(result, error);
+                }).then(resp => console.log(resp)).catch(_err => console.log("Something went wrong, please try again later."));
+            })
+        }
+    }
+
+    let photoPhotos = [];
+    const FILES: any = req.files;
+    if (FILES) {
+        const resp = await Promise.all(
+            FILES.map(async (file) => {
+                if (!file) return;
+                let data_uri = dataUri(file);
+
+                if (data_uri) {
+                    const uploadRes = await cloudinary.uploader.upload(data_uri, {
+                        upload_preset: 'post-pic'
+                    });
+                    return uploadRes;
+                }
+                return null;
+            })
+        );
+        photoPhotos = resp;
+    }
+    tempPhotos = [...tempPhotos, ...photoPhotos];
+
     const respo = await Post.updateOne({ _id: postId }, {
         $set: {
-            "content": content
+            "content": content,
+            'photos': tempPhotos
         }
     });
 

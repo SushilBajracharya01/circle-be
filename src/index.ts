@@ -27,7 +27,6 @@ import circleRouter from "./routes/circleRoutes.js";
 import postRouter from "./routes/postRoutes.js";
 import { Server } from "socket.io";
 import { allowedOrigins } from "./configs/allowedOrigins.js";
-import { SOCKET_CONNECT, SOCKET_SEND_INVITE } from "./socketConstants.js";
 
 const { __dirname } = fileDirName(import.meta);
 
@@ -82,13 +81,20 @@ const io = new Server(httpServer, {
     },
 });
 
-io.on(SOCKET_CONNECT, (socket) => {
-    console.log("initial transport", socket.conn.transport.name);
+// io.on(SOCKET_CONNECT, (socket) => {
+//     console.log("initial transport", socket.conn.transport.name);
+//     const socketHandler = new SocketHandler(socket, clientManager, circleManager, directMessageHandler, io);
 
-    socket.on(SOCKET_SEND_INVITE, (data) => {
-        console.log(data, 'type, data')
-    });
-});
+//     clientManager.addClient(socket, io);
+
+//     socket.on(SOCKET_SEND_INVITE, (data) => {
+//         console.log(data, 'type, data')
+//         socket.to(data.invitee).emit(SOCKET_RECEIVE_INVITE, {
+//             data,
+//             from: socket.id,
+//         });
+//     });
+// });
 
 
 mongoose.connection.once('open', () => {

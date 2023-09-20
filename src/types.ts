@@ -11,3 +11,11 @@ export interface IInviteInCircleProps {
     invitedBy: string;
     invitee: string;
 }
+
+export interface ISocketHandlerProps {
+    client: any;
+    circleHandler: any;
+    clientManager: any;
+    directMessageHandler: any;
+    io: any;
+}
