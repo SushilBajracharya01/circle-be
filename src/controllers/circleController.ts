@@ -1,6 +1,11 @@
 import expressAsyncHandler from "express-async-handler";
-import { Request, Response } from 'express';
+import { Response } from 'express';
+
+//
+import Post from "../models/Post.js";
 import Circle from '../models/Circle.js';
+
+//
 import { IRequestModified } from "../types.js";
 import { dataUri } from "../middleware/multer.js";
 import cloudinary from "../utilities/cloudinary.js";
@@ -33,7 +38,7 @@ export const getCircleById = expressAsyncHandler(async (req: IRequestModified, r
     const { id } = req.params;
 
     const circle = await Circle.findOne({ _id: id }).select('-updatedAt -__v');
-    
+
     if (!circle) {
         res.status(400).json({
             result: null,
@@ -147,7 +152,7 @@ export const deleteCircle = expressAsyncHandler(async (req: IRequestModified, re
     const userId = req._id;
 
     if (!id) {
-        res.status(400).json({ message: "id fields are required" })
+        res.status(400).json({ message: "circle id is required" })
         return;
     }
 
@@ -165,6 +170,8 @@ export const deleteCircle = expressAsyncHandler(async (req: IRequestModified, re
         }
 
         await Circle.deleteOne({ _id: id });
+
+        await Post.deleteMany({ circleId: id });
 
         res.json({ message: `Deleted successfully` })
         return;
