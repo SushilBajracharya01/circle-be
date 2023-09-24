@@ -12,9 +12,20 @@ export const getPostsByCircleId = expressAsyncHandler(async (req: IRequestModifi
     const userId = req._id;
     const { circleId } = req.params;
 
-    const posts = await Post.find({ circleId }).populate('createdBy', { username: 1, fullname: 1, photo: 1 }).select('-__v').sort({
+    let page: number = req.query.page ? +req.query.page : 1;
+    let pageSize: number = req.query.pageSize ? +req.query.pageSize : 10;
+
+    const skipValue = (page - 1) * pageSize;
+
+    let query = { circleId };
+
+    const posts = await Post.find(query).skip(skipValue).limit(pageSize).populate('createdBy', { username: 1, fullname: 1, photo: 1 }).select('-__v').sort({
         _id: -1
-    }).limit(10);
+    });
+
+    const totalDocuments = await Post.countDocuments(query);
+    const totalPages = Math.ceil(totalDocuments / pageSize);
+
     if (!posts?.length) {
         res.status(400).json({ message: 'No Circles found' });
         return null;
@@ -23,7 +34,10 @@ export const getPostsByCircleId = expressAsyncHandler(async (req: IRequestModifi
     res.json({
         message: 'Posts in the circle',
         status: 200,
-        results: posts
+        results: posts,
+        currentPage: page,
+        totalPages: totalPages,
+        totalDocuments: totalDocuments,
     });
 });
 
