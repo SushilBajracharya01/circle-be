@@ -22,7 +22,7 @@ export const getPostsByCircleId = expressAsyncHandler(async (req: IRequestModifi
 
     const totalDocuments = await Post.countDocuments(query);
     const totalPages = Math.ceil(totalDocuments / pageSize);
-    console.log(skipValue, totalDocuments, totalPages, page, 'sdsd')
+
     if (page > totalPages) {
         res.status(400).json({ message: 'No Circles found', status: 404 });
         return null;
