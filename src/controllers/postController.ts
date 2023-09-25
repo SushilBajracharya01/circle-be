@@ -12,6 +12,7 @@ export const getPostsByCircleId = expressAsyncHandler(async (req: IRequestModifi
     const userId = req._id;
     const { circleId } = req.params;
 
+
     let page: number = req.query.page ? +req.query.page : 1;
     let pageSize: number = req.query.pageSize ? +req.query.pageSize : 10;
 
@@ -19,15 +20,21 @@ export const getPostsByCircleId = expressAsyncHandler(async (req: IRequestModifi
 
     let query = { circleId };
 
+    const totalDocuments = await Post.countDocuments(query);
+    const totalPages = Math.ceil(totalDocuments / pageSize);
+    console.log(skipValue, totalDocuments, totalPages, page, 'sdsd')
+    if (page > totalPages) {
+        res.status(400).json({ message: 'No Circles found', status: 404 });
+        return null;
+    }
+
     const posts = await Post.find(query).skip(skipValue).limit(pageSize).populate('createdBy', { username: 1, fullname: 1, photo: 1 }).select('-__v').sort({
         _id: -1
     });
 
-    const totalDocuments = await Post.countDocuments(query);
-    const totalPages = Math.ceil(totalDocuments / pageSize);
 
     if (!posts?.length) {
-        res.status(400).json({ message: 'No Circles found' });
+        res.status(400).json({ message: 'No Circles found', status: 404 });
         return null;
     }
 
