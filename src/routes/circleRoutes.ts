@@ -13,7 +13,7 @@ circleRouter.route('/')
 
 circleRouter.route('/:id')
     .get(getCircleById)
-    .patch(updateCircle)
+    .patch(multerUploads, updateCircle)
     .delete(deleteCircle);
 
 

@@ -69,7 +69,7 @@ export const getCircleById = expressAsyncHandler(async (req: IRequestModified, r
 export const createNewCircle = expressAsyncHandler(async (req: IRequestModified, res: Response) => {
     const userId = req._id;
     const { name, description, moto } = req.body;
-    console.log(name, 'name')
+
     // Confirm data
     if (!name) {
         res.status(400).json({ message: 'Name Fields are required' });
@@ -136,6 +136,31 @@ export const updateCircle = expressAsyncHandler(async (req: IRequestModified, re
     circle.name = name;
     circle.description = description;
     circle.moto = moto;
+
+
+    let circlePhotoObject = null;
+    let circleImagePic = null;
+    if (req.files && req.files[0]) {
+        let tempPic = req.files[0];
+        if (!tempPic) return;
+        circleImagePic = dataUri(tempPic);
+    }
+
+    if (circleImagePic) {
+        const uploadRes = await cloudinary.uploader.upload(circleImagePic, {
+            upload_preset: 'circle-pic'
+        });
+        if (uploadRes) {
+            circlePhotoObject = uploadRes;
+            // remove old photo from cloudinary
+            if (circle.photo?.public_id) {
+                await cloudinary.uploader.destroy(circle.photo.public_id, function (error, result) {
+                }).then(resp => console.log(resp)).catch(_err => console.log("Something went wrong, please try again later."));
+            }
+            circle.photo = circlePhotoObject;
+        }
+    }
+
 
     const updatedCircle = await circle.save();
 
