@@ -4,6 +4,7 @@ import { IRequestModified } from "../types.js";
 import Post from "../models/Post.js";
 import { dataUri } from "../middleware/multer.js";
 import cloudinary from "../utilities/cloudinary.js";
+import Comment from "../models/Comment.js";
 
 // @desc Get all post by userId
 // @route GET /post
@@ -229,6 +230,183 @@ export const deletePost = expressAsyncHandler(async (req: IRequestModified, res:
         })
 
         await Post.deleteOne({ _id: postId });
+
+        res.json({ message: `Deleted successfully` })
+        return;
+    }
+    catch (err) {
+        res.status(400).json({ message: 'Something went wrong!' });
+        return;
+    }
+});
+
+
+// post comments
+
+// @desc Create new comment
+// @route POST /posts/postId/comment
+// @access Private
+export const createNewComment = expressAsyncHandler(async (req: IRequestModified, res: Response) => {
+    const userId = req._id;
+    const { postId } = req.params;
+
+    const { comment } = req.body;
+
+    if (!postId) {
+        res.status(400).json({ message: 'PostId is required' });
+        return;
+    }
+
+    // Confirm data
+    if (!comment) {
+        res.status(400).json({ message: 'Comment Field is required' });
+        return;
+    }
+
+    let photos = [];
+    const FILES: any = req.files;
+    if (FILES) {
+        const resp = await Promise.all(
+            FILES.map(async (file) => {
+                if (!file) return;
+                let data_uri = dataUri(file);
+
+                if (data_uri) {
+                    const uploadRes = await cloudinary.uploader.upload(data_uri, {
+                        upload_preset: 'comment-pic'
+                    });
+                    return uploadRes;
+                }
+                return null;
+            })
+        );
+        photos = resp;
+    }
+
+    const commentObject = { postId: postId, comment, createdBy: userId, photos: photos };
+
+    // Create and Store new post
+    const commentRes = await Comment.create(commentObject);
+
+    if (commentRes) {
+        res.status(201).json({ message: `Comment created successfully!` });
+        return;
+    }
+    else {
+        res.status(400).json({ message: 'Invalid comment data received' });
+        return;
+    }
+});
+
+
+// @desc Update comment
+// @route PATCH /posts/postId/comment
+// @access Private
+export const updateComment = expressAsyncHandler(async (req: IRequestModified, res: Response) => {
+    const { commentId } = req.params;
+    const userId = req._id;
+    const { comment, deletedImages } = req.body;
+
+    // Confirm data
+    if (!comment) {
+        res.status(400).json({ message: "Comment field is required" })
+        return;
+    }
+
+    const commentData = await Comment.findById(commentId).exec();
+
+    if (!commentData) {
+        res.status(404).json({ message: 'Comment not found' });
+        return;
+    }
+
+    if (`${commentData.createdBy}` !== userId) {
+        res.status(401).json({ message: 'You do not have the permission to update this Comment.' });
+        return;
+    }
+
+    let tempPhotos = [...commentData.photos];
+    if (deletedImages) {
+        if (typeof deletedImages === 'string') {
+            await cloudinary.uploader.destroy(deletedImages, function (error, result) {
+                tempPhotos = tempPhotos.filter(photo => photo.public_id !== deletedImages);
+            }).then(resp => console.log(resp)).catch(_err => console.log("Something went wrong, please try again later."));
+        }
+        else {
+            deletedImages.forEach(async (publicId: string) => {
+                await cloudinary.uploader.destroy(publicId, function (error, result) {
+                    tempPhotos = tempPhotos.filter(photo => photo.public_id !== publicId);
+                    console.log(result, error);
+                }).then(resp => console.log(resp)).catch(_err => console.log("Something went wrong, please try again later."));
+            })
+        }
+    }
+
+    let photoPhotos = [];
+    const FILES: any = req.files;
+    if (FILES) {
+        const resp = await Promise.all(
+            FILES.map(async (file) => {
+                if (!file) return;
+                let data_uri = dataUri(file);
+
+                if (data_uri) {
+                    const uploadRes = await cloudinary.uploader.upload(data_uri, {
+                        upload_preset: 'comment-pic'
+                    });
+                    return uploadRes;
+                }
+                return null;
+            })
+        );
+        photoPhotos = resp;
+    }
+    tempPhotos = [...tempPhotos, ...photoPhotos];
+
+    const respo = await Comment.updateOne({ _id: commentId }, {
+        $set: {
+            "comment": comment,
+            'photos': tempPhotos
+        }
+    });
+
+    res.json({ message: "Comment updated successfully" })
+    return;
+});
+
+// @desc Delete post
+// @route DELETE /posts/postId/comment/commentId
+// @access Private
+export const deleteComment = expressAsyncHandler(async (req: IRequestModified, res: Response) => {
+    const { commentId } = req.params;
+
+    const userId = req._id;
+
+    if (!commentId) {
+        res.status(400).json({ message: "CommentId field is required" })
+        return;
+    }
+
+    try {
+        const comment = await Comment.findById(commentId).exec();
+
+        if (!comment) {
+            res.status(404).json({ message: 'Comment not found!' });
+            return;
+        }
+
+        if (`${comment.createdBy}` !== userId) {
+            res.status(401).json({ message: 'You do not have the permission to delete this Comment.' });
+            return;
+        }
+
+        comment.photos.forEach(async photo => {
+            await cloudinary.uploader.destroy(photo.public_id, function (error, result) {
+                console.log(result, error);
+            }).then(resp => console.log(resp)).catch(_err => console.log("Something went wrong, please try again later."));
+        })
+
+        await Comment.deleteOne({ _id: commentId });
 
         res.json({ message: `Deleted successfully` })
         return;
