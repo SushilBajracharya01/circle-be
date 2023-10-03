@@ -5,12 +5,12 @@ import Post from "../models/Post.js";
 import { dataUri } from "../middleware/multer.js";
 import cloudinary from "../utilities/cloudinary.js";
 import Comment from "../models/Comment.js";
+import { ObjectId } from "mongodb";
 
 // @desc Get all post by userId
 // @route GET /post
 // @access Private
 export const getPostsByCircleId = expressAsyncHandler(async (req: IRequestModified, res: Response) => {
-    const userId = req._id;
     const { circleId } = req.params;
 
 
@@ -22,6 +22,7 @@ export const getPostsByCircleId = expressAsyncHandler(async (req: IRequestModifi
     let query = { circleId };
 
     const totalDocuments = await Post.countDocuments(query);
+
     const totalPages = Math.ceil(totalDocuments / pageSize);
 
     if (page > totalPages) {
@@ -29,24 +30,82 @@ export const getPostsByCircleId = expressAsyncHandler(async (req: IRequestModifi
         return null;
     }
 
-    const posts = await Post.find(query).skip(skipValue).limit(pageSize).populate('createdBy', { username: 1, fullname: 1, photo: 1 }).select('-__v').sort({
-        _id: -1
-    });
+    const agg: any = [
+        {
+            '$match': {
+                'circleId': new ObjectId(circleId)
+            }
+        }, {
+            '$sort': {
+                'createdAt': -1
+            }
+        }, {
+            '$skip': skipValue
+        }, {
+            '$limit': pageSize
+        }, {
+            '$lookup': {
+                'from': 'users',
+                'localField': 'createdBy',
+                'foreignField': '_id',
+                'as': 'createdBy'
+            }
+        }, {
+            '$lookup': {
+                'from': 'comments',
+                'localField': '_id',
+                'foreignField': 'postId',
+                'as': 'comments'
+            }
+        }, {
+            '$addFields': {
+                'commentCount': {
+                    '$size': '$comments'
+                }
+            }
+        }, {
+            '$project': {
+                '__v': 0,
+                'updatedAt': 0,
+                'createdBy': {
+                    '__v': 0,
+                    'password': 0
+                },
+                'comments': 0
+            }
+        }, {
+            '$unwind': {
+                'path': '$createdBy'
+            }
+        }
+    ];
 
+    try {
+        const posts = await Post.aggregate(agg);
 
-    if (!posts?.length) {
-        res.status(400).json({ message: 'No Circles found', status: 404 });
-        return null;
+        if (!posts?.length) {
+            res.status(400).json({ message: 'No Circles found', status: 404 });
+            return null;
+        }
+
+        res.json({
+            message: 'Posts in the circle',
+            status: 200,
+            results: posts,
+            currentPage: page,
+            totalPages: totalPages,
+            totalDocuments: totalDocuments,
+        });
+    }
+    catch (err) {
+        console.log(err)
     }
 
-    res.json({
-        message: 'Posts in the circle',
-        status: 200,
-        results: posts,
-        currentPage: page,
-        totalPages: totalPages,
-        totalDocuments: totalDocuments,
-    });
+    // const posts = await Post.find(query).skip(skipValue).limit(pageSize).populate('createdBy', { username: 1, fullname: 1, photo: 1 }).select('-__v').sort({
+    //     _id: -1
+    // });
+
+
 });
 
 // @desc Get post by postId
@@ -243,6 +302,57 @@ export const deletePost = expressAsyncHandler(async (req: IRequestModified, res:
 
 // post comments
 
+// @desc Get comments by postId
+// @route GET /get
+// @access Private
+export const getComments = expressAsyncHandler(async (req: IRequestModified, res: Response) => {
+    const { postId } = req.params;
+
+    let pipeline: any = [
+        {
+            '$match': {
+                'postId': new ObjectId(postId)
+            },
+        }, {
+            '$sort': {
+                'createdAt': -1
+            }
+        }, {
+            '$lookup': {
+                'from': 'users',
+                'localField': 'createdBy',
+                'foreignField': '_id',
+                'as': 'createdBy'
+            }
+        }, {
+            '$unwind': {
+                'path': '$createdBy'
+            }
+        }, {
+            '$project': {
+                '__v': 0,
+                'updatedAt': 0,
+                'createdBy': {
+                    '__v': 0,
+                    'password': 0
+                },
+            }
+        },
+    ]
+
+    const comments = await Comment.aggregate(pipeline);
+
+    if (!comments) {
+        res.status(400).json({ message: 'No comments found' });
+        return null;
+    }
+
+    res.json({
+        message: "Comments by Id",
+        result: comments,
+        status: 200
+    });
+});
 // @desc Create new comment
 // @route POST /posts/postId/comment
 // @access Private
