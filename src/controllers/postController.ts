@@ -314,10 +314,6 @@ export const getComments = expressAsyncHandler(async (req: IRequestModified, res
                 'postId': new ObjectId(postId)
             },
         }, {
-            '$sort': {
-                'createdAt': -1
-            }
-        }, {
             '$lookup': {
                 'from': 'users',
                 'localField': 'createdBy',
