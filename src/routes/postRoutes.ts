@@ -24,7 +24,7 @@ postRouter.route('/:postId/comment')
     .get(getComments)
     .post(multerUploads, createNewComment);
 
-postRouter.route('/:postId/comment/:commentId')
+postRouter.route('/comment/:commentId')
     .patch(multerUploads, updateComment)
     .delete(deleteComment);
 
