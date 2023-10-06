@@ -2,12 +2,8 @@ import mongoose from 'mongoose';
 
 const notificationSchema = new mongoose.Schema({
     type: {
-        type: String,// nee to make it enum CIRCLE_INVITE, POST_ACTIONS,
-        enum: ['CIRCLE_INVITE', 'POST_ACTIONS'],
-        required: true
-    },
-    tite: {
         type: String,
+        enum: ['CIRCLE_INVITE', 'POST_ACTIONS'],
         required: true
     },
     userId: {
@@ -15,9 +11,20 @@ const notificationSchema = new mongoose.Schema({
         ref: "User",
         required: true,
     },
+    senderId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
+    circleId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Circle",
+        required: true,
+    },
     hasRead: {
         type: Boolean,
-        requried: true
+        requried: true,
+        default: false
     },
     meta: {
         type: Object

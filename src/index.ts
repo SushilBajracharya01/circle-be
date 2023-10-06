@@ -25,6 +25,7 @@ import authRouter from "./routes/authRoutes.js";
 import userRouter from "./routes/userRoutes.js";
 import circleRouter from "./routes/circleRoutes.js";
 import postRouter from "./routes/postRoutes.js";
+import notificationRouter from "./routes/notificationRoutes.js";
 import { Server } from "socket.io";
 import { allowedOrigins } from "./configs/allowedOrigins.js";
 
@@ -55,6 +56,7 @@ app.use('/auth', authRouter);
 app.use('/users', userRouter);
 app.use('/circles', circleRouter);
 app.use('/posts', postRouter);
+app.use('/notification', notificationRouter);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 app.all('*', (req: any, res: any) => {
