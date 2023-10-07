@@ -3,7 +3,6 @@ import expressAsyncHandler from "express-async-handler";
 import { Request, Response } from 'express';
 
 import { IRequestModified } from '../types.js';
-import User from '../models/User.js';
 import Notification from '../models/Notification.js';
 import { ObjectId } from 'mongodb';
 
@@ -14,19 +13,14 @@ export const getMyNotifications = expressAsyncHandler(async (req: IRequestModifi
     const userId = req._id;
 
     let query = { userId };
-                                                                                                                                                     
+
     let page: number = req.query.page ? +req.query.page : 1;
     let pageSize: number = req.query.pageSize ? +req.query.pageSize : 10;
 
-    const skipValue = (page - 1) * pageSize;                                                                                                                                                                                                   
+    const skipValue = (page - 1) * pageSize;
     const totalDocuments = await Notification.countDocuments(query);
 
     const totalPages = Math.ceil(totalDocuments / pageSize);
-
-    if (page > totalPages) {
-        res.status(400).json({ message: 'No Circles found', status: 404 });
-        return null;
-    }
 
     const agg = [
         {
@@ -62,26 +56,33 @@ export const getMyNotifications = expressAsyncHandler(async (req: IRequestModifi
         }, {
             '$project': {
                 '__v': 0,
+
+            }
+        }, {
+            '$project': {
                 'user': {
-                    '__v': 0,
-                    'password': 0
+                    'fullname': 1,
+                    '_id': 1
                 },
                 'sender': {
-                    '__v': 0,
-                    'password': 0
+                    'fullname': 1,
+                    '_id': 1
                 }
             }
         }
     ];
     const notifications = await Notification.aggregate(agg);
 
-    const user = await Notification.findById(userId).select(['-password', '-__v']).lean();
-    if (!user) {
+    if (!notifications) {
         res.status(400).json({ message: 'No user found' });
         return null;
     }
 
-    res.json(user);
+    res.json({
+        status: 200,
+        message: 'Notification',
+        results: notifications
+    });
 });
 
 // @desc Create new notification

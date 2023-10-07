@@ -22,3 +22,4 @@ Use mongoose.model(name, schema)	GET	/posts/64fc8055fd2367f8dddd36ca?page=1	http
 20231003	00:51:55	87aa1bd4-2bb2-45ef-968e-17e5dcce6ac3	BSONVersionError: Unsupported BSON version, bson types must be from bson 5.0 or later	GET	/posts/64fc8055fd2367f8dddd36ca?page=1	http://localhost:5173
 20231003	00:53:32	617ee366-7b52-4d00-b03f-990284a59579	BSONVersionError: Unsupported BSON version, bson types must be from bson 5.0 or later	GET	/posts/64fc8055fd2367f8dddd36ca?page=1	http://localhost:5173
 20231003	00:53:42	65dcb2e5-c830-41ea-96f8-112d8890c568	BSONVersionError: Unsupported BSON version, bson types must be from bson 5.0 or later	GET	/posts/64fc8055fd2367f8dddd36ca?page=1	http://localhost:5173
+20231006	16:51:08	de1f5cfb-4ad5-422b-ba49-a57317337a28	MongoServerError: Invalid $project :: caused by :: Cannot do inclusion on field fullname in exclusion projection	GET	/notification	http://localhost:5173
