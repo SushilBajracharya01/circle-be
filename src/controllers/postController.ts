@@ -6,6 +6,7 @@ import { dataUri } from "../middleware/multer.js";
 import cloudinary from "../utilities/cloudinary.js";
 import Comment from "../models/Comment.js";
 import { ObjectId } from "mongodb";
+import PostReaction from "../models/PostReactions.js";
 
 // @desc Get all post by userId
 // @route GET /post
@@ -56,6 +57,40 @@ export const getPostsByCircleId = expressAsyncHandler(async (req: IRequestModifi
             '$addFields': {
                 'commentCount': {
                     '$size': '$comments'
+                },
+                'itemFromPage': page
+            }
+        }, {
+            '$lookup': {
+                'from': 'postreactions',
+                'localField': '_id',
+                'foreignField': 'postId',
+                'as': 'reactionObj'
+            }
+        },
+        {
+            '$addFields': {
+                'reactions': {
+                    $map: {
+                        input: "$reactionObj",
+                        as: "reaction",
+                        in: {
+                            $mergeObjects: [
+                                {
+                                    by: "$$reaction.createdBy",
+                                    emoji: "$$reaction.reaction"
+                                },
+                            ]
+                        }
+
+                    }
+                }
+            }
+        },
+        {
+            '$addFields': {
+                'reactionCount': {
+                    '$size': '$reactionObj'
                 }
             }
         }, {
@@ -66,7 +101,8 @@ export const getPostsByCircleId = expressAsyncHandler(async (req: IRequestModifi
                     '__v': 0,
                     'password': 0
                 },
-                'comments': 0
+                'comments': 0,
+                'reactionObj': 0,
             }
         }, {
             '$unwind': {
@@ -475,7 +511,7 @@ export const updateComment = expressAsyncHandler(async (req: IRequestModified, r
     return;
 });
 
-// @desc Delete post
+// @desc Delete comment
 // @route DELETE /posts/postId/comment/commentId
 // @access Private
 export const deleteComment = expressAsyncHandler(async (req: IRequestModified, res: Response) => {
@@ -517,3 +553,153 @@ export const deleteComment = expressAsyncHandler(async (req: IRequestModified, r
         return;
     }
 });
+
+// reactions
+
+// @desc Create Update Delete reaction
+// @route POST /posts/postId/reaction
+// @access Private
+export const postReaction = expressAsyncHandler(async (req: IRequestModified, res: Response) => {
+    const userId = req._id;
+    const { postId } = req.params;
+
+    const { reaction, itemFromPage } = req.body;
+
+    if (!postId) {
+        res.status(400).json({ message: 'PostId is required' });
+        return;
+    }
+
+    // check if user has already reacted to this post
+
+    const userReaction: any = await PostReaction.findOne({ createdBy: userId, postId: postId });
+
+    if (userReaction) {
+        if (userReaction.reaction === reaction) {
+            await PostReaction.deleteOne({ _id: userReaction._id });
+            const post = await getPost({ postId, itemFromPage });
+
+            res.json({ message: `Deleted successfully`, data: post })
+            return;
+        }
+        else {
+            const respo = await PostReaction.updateOne({ _id: userReaction._id }, {
+                $set: {
+                    "reaction": reaction
+                }
+            });
+
+            if (!respo) {
+                res.status(400).json({ message: 'Invalid reaction data received' });
+                return;
+            }
+            const post = await getPost({ postId, itemFromPage });
+
+            res.json({ message: "Reaction updated successfully", data: post })
+            return;
+        }
+    }
+
+    const reactionObject = { postId: postId, reaction: reaction, createdBy: userId };
+
+    // Create and Store new post
+    const reactionRes = await PostReaction.create(reactionObject);
+
+    if (reactionRes) {
+        const post = await getPost({ postId, itemFromPage });
+
+        res.status(201).json({ message: `Reaction created successfully!`, data: post });
+        return;
+    }
+    else {
+        res.status(400).json({ message: 'Invalid reaction data received' });
+        return;
+    }
+});
+
+const getPost = async ({ postId, itemFromPage }) => {
+    const agg: any = [
+        {
+            '$match': {
+                '_id': new ObjectId(postId)
+            }
+        }, {
+            '$sort': {
+                'createdAt': -1
+            }
+        },
+        {
+            '$lookup': {
+                'from': 'users',
+                'localField': 'createdBy',
+                'foreignField': '_id',
+                'as': 'createdBy'
+            }
+        }, {
+            '$lookup': {
+                'from': 'comments',
+                'localField': '_id',
+                'foreignField': 'postId',
+                'as': 'comments'
+            }
+        }, {
+            '$addFields': {
+                'commentCount': {
+                    '$size': '$comments'
+                },
+                'itemFromPage': itemFromPage
+            }
+        }, {
+            '$lookup': {
+                'from': 'postreactions',
+                'localField': '_id',
+                'foreignField': 'postId',
+                'as': 'reactionObj'
+            }
+        },
+        {
+            '$addFields': {
+                'reactions': {
+                    $map: {
+                        input: "$reactionObj",
+                        as: "reaction",
+                        in: {
+                            $mergeObjects: [
+                                {
+                                    by: "$$reaction.createdBy",
+                                    emoji: "$$reaction.reaction"
+                                },
+                            ]
+                        }
+
+                    }
+                }
+            }
+        },
+        {
+            '$addFields': {
+                'reactionCount': {
+                    '$size': '$reactionObj'
+                }
+            }
+        }, {
+            '$project': {
+                '__v': 0,
+                'updatedAt': 0,
+                'createdBy': {
+                    '__v': 0,
+                    'password': 0
+                },
+                'comments': 0,
+                'reactionObj': 0,
+            }
+        }, {
+            '$unwind': {
+                'path': '$createdBy'
+            }
+        }
+    ];
+
+    const result = await Post.aggregate(agg);
+    return result[0];
+}

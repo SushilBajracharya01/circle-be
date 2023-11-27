@@ -23,3 +23,14 @@ Use mongoose.model(name, schema)	GET	/posts/64fc8055fd2367f8dddd36ca?page=1	http
 20231003	00:53:32	617ee366-7b52-4d00-b03f-990284a59579	BSONVersionError: Unsupported BSON version, bson types must be from bson 5.0 or later	GET	/posts/64fc8055fd2367f8dddd36ca?page=1	http://localhost:5173
 20231003	00:53:42	65dcb2e5-c830-41ea-96f8-112d8890c568	BSONVersionError: Unsupported BSON version, bson types must be from bson 5.0 or later	GET	/posts/64fc8055fd2367f8dddd36ca?page=1	http://localhost:5173
 20231006	16:51:08	de1f5cfb-4ad5-422b-ba49-a57317337a28	MongoServerError: Invalid $project :: caused by :: Cannot do inclusion on field fullname in exclusion projection	GET	/notification	http://localhost:5173
+20231107	20:38:11	672968e8-3eb2-4209-a704-09d80ba99a37	MongoServerError: Invalid $project :: caused by :: FieldPath cannot be constructed with empty string	GET	/notification	http://localhost:5173
+20231107	20:42:17	eb7f0741-deeb-4ac9-90d0-fa8c3a75635b	MongoServerError: Invalid $project :: caused by :: FieldPath cannot be constructed with empty string	GET	/notification	http://localhost:5173
+20231108	09:14:50	61951855-bddf-4397-a71e-634d628e8c84	MongoServerError: Invalid $project :: caused by :: FieldPath cannot be constructed with empty string	GET	/notification	http://localhost:5173
+20231109	13:24:33	1ea53519-d64c-4bc8-8374-e685c02a64a2	MongoServerError: Invalid $project :: caused by :: FieldPath cannot be constructed with empty string	GET	/notification	http://localhost:5173
+20231109	14:06:34	7794252b-af26-4384-b93c-e84f3c4e4ed6	MongoServerError: Invalid $project :: caused by :: FieldPath cannot be constructed with empty string	GET	/notification	http://localhost:5173
+20231109	14:08:31	c9425444-bbef-42dc-8b1b-1eb41b1a1efa	MongoServerError: Invalid $project :: caused by :: FieldPath cannot be constructed with empty string	GET	/notification	http://localhost:5173
+20231109	14:08:33	96ad31de-160d-470d-b595-52339a8d7ee5	MongoServerError: Invalid $project :: caused by :: FieldPath cannot be constructed with empty string	GET	/notification	http://localhost:5173
+20231109	14:08:37	3a55f22b-80c2-4752-b58f-b8f1bf7508bd	MongoServerError: Invalid $project :: caused by :: FieldPath cannot be constructed with empty string	GET	/notification	http://localhost:5173
+20231109	14:09:24	0fac7209-abcb-4e91-8bed-198f25e91af7	MongoServerError: Invalid $project :: caused by :: FieldPath cannot be constructed with empty string	GET	/notification	http://localhost:5173
+20231109	14:11:48	ee357431-a742-47ff-8452-c4d795c21847	MongoServerError: Invalid $project :: caused by :: FieldPath cannot be constructed with empty string	GET	/notification	http://localhost:5173
+20231109	14:22:58	b2a592f6-f744-42f9-bdc6-0785bb674b79	MongoServerError: Invalid $project :: caused by :: FieldPath cannot be constructed with empty string	GET	/notification	http://localhost:5173

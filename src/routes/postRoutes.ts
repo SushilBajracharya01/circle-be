@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import verifyJWT from '../middleware/verifyJWT.js';
-import { createNewComment, createNewPost, deleteComment, deletePost, getComments, getPostsByCircleId, getPostsById, updateComment, updatePost } from '../controllers/postController.js';
+import { createNewComment, createNewPost, postReaction, deleteComment, deletePost, getComments, getPostsByCircleId, getPostsById, updateComment, updatePost } from '../controllers/postController.js';
 import { multerUploads } from '../middleware/multer.js';
 
 const postRouter = Router();
@@ -28,5 +28,7 @@ postRouter.route('/comment/:commentId')
     .patch(multerUploads, updateComment)
     .delete(deleteComment);
 
+postRouter.route('/:postId/reaction')
+    .post(postReaction);
 
 export default postRouter;

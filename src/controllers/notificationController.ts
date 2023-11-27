@@ -55,11 +55,6 @@ export const getMyNotifications = expressAsyncHandler(async (req: IRequestModifi
             }
         }, {
             '$project': {
-                '__v': 0,
-
-            }
-        }, {
-            '$project': {
                 'user': {
                     'fullname': 1,
                     '_id': 1
